@@ -28,9 +28,9 @@ export class FriendRepository{
     searchFriends(query:string,pageOption?:PageOptions){
         const lowerQuery = query.toLowerCase();
         const filtered =  this.friends.filter(friend=>{
-            friend.name.toLowerCase().includes(lowerQuery) ||
-            friend.email.toLowerCase().includes(lowerQuery) ||
-            friend.phone.toLowerCase().includes(lowerQuery)
+            return friend.name.toLowerCase().includes(lowerQuery) ||
+                   friend.email.toLowerCase().includes(lowerQuery) ||
+                   friend.phone.toLowerCase().includes(lowerQuery);
         })
 
         return {

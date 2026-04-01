@@ -15,4 +15,19 @@ export class FriendsController{
         console.log('Adding friend to database...',friend)
         FriendRepository.getInstance().addFriend(friend);
     }
+    searchFriends(query:string){
+    const repository = FriendRepository.getInstance();
+    
+    if(!repository){
+        return {success:false, data:[]}
+    }
+    
+    const result = repository.searchFriends(query);
+    
+    return {
+        success:true,
+        data:result.data,
+        total:result.matched
+    };
+}
 }

@@ -14,9 +14,9 @@ const {ask,choose,close} = openInteractionManager();
 
 const addFriend = async ()=>{
     const name = await ask('Enter freind name:');
-    const email = await ask('Enter friend email');
-    const phone = await ask('Enter friend phone number');
-    const openingBalance = await ask('Enter opening balance (positive mean they owe you,negative means you owe them)',{validator:numberValidator});
+    const email = await ask('Enter friend email:');
+    const phone = await ask('Enter friend phone number:');
+    const openingBalance = await ask('Enter opening balance (positive mean they owe you,negative means you owe them):',{validator:numberValidator});
 
     const friend = {
         id: Date.now().toString(),
@@ -30,6 +30,22 @@ const addFriend = async ()=>{
     controller.addFriend(friend);
 }
 
+const searchFriend = async ()=>{
+    const query = await ask('Enter search term (name, email, or phone):');
+    
+    const controller = new FriendsController();
+    const result = controller.searchFriends(query || '');
+    
+    if(result.success && result.data.length > 0){
+        console.log(`\nFound ${result.total} friend(s):`);
+        result.data.forEach(friend => {
+            console.log(`- ${friend.name} (${friend.email}, ${friend.phone}) - Balance: $${friend.balance}`);
+        });
+    } else {
+        console.log('No friends found matching your search.');
+    }
+}
+
 export const manageFriends = async ()=>{
     while(true){
         const choice = await choose('What do you want to do?',options,false);
@@ -40,7 +56,7 @@ export const manageFriends = async ()=>{
                 console.log('Friend added successfully!');
                 break;
             case '2':
-                console.log('Searchiing friend...');
+                await searchFriend();
                 break;
             case '3':
                 console.log('Updating friend...');

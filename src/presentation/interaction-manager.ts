@@ -13,7 +13,12 @@ export interface Choice {
 
 
 export const openInteractionManager = () => {
-  const rl = readline.createInterface({ input, output });
+  const rl = readline.createInterface({ 
+    input, 
+    output,
+    terminal: false,
+    prompt: ''
+  });
   const ask:(question: string, options?: AskOptions)=>Promise<string|undefined> = async (question: string, options?: AskOptions) => {
     const { defaultAnswer, validator } = options || {};
     return new Promise((resolve) => {
