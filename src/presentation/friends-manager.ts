@@ -1,5 +1,6 @@
 import { numberValidator } from "../core/validators/number.validator.js";
 import { openInteractionManager, type Choice } from "./interaction-manager.js";
+import { FriendsController } from "../controller/friends.controller.js";
 
 const options: Choice[] = [
   { label: "Add Friend", value: "1" },
@@ -19,11 +20,14 @@ const addFriend = async ()=>{
 
     const friend = {
         id: Date.now().toString(),
-        name,
-        email,
-        phone,
+        name: name || '',
+        email: email || '',
+        phone: phone || '',
         balance:Number(openingBalance)
     }
+
+    const controller = new FriendsController();
+    controller.addFriend(friend);
 }
 
 export const manageFriends = async ()=>{
@@ -32,7 +36,8 @@ export const manageFriends = async ()=>{
 
         switch(choice!.value){
             case '1':
-                console.log('Adding friend...');
+                await addFriend();
+                console.log('Friend added successfully!');
                 break;
             case '2':
                 console.log('Searchiing friend...');

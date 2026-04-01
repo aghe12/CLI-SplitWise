@@ -1,5 +1,5 @@
-const readline = require("node:readline");
-const { stdin: input, stdout: output } = require("node:process");
+import readline from "node:readline";
+import { stdin as input, stdout as output } from "node:process";
 
 export interface AskOptions {
   defaultAnswer?: string | undefined;
