@@ -30,4 +30,19 @@ export class FriendsController{
         total:result.matched
     };
 }
+    removeFriend(identifier:string){
+    const repository = FriendRepository.getInstance();
+    
+    if(!repository){
+        return {success:false, message:'Repository not available'}
+    }
+    
+    const removedFriend = repository.removeFriend(identifier);
+    
+    if(!removedFriend){
+        return {success:false, message:'Friend not found with this email or phone'}
+    }
+    
+    return {success:true, message:'Friend removed successfully', data:removedFriend}
+}
 }

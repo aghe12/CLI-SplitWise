@@ -39,4 +39,18 @@ export class FriendRepository{
             total:this.friends.length
         }
     }
+    removeFriend(identifier:string){
+    const index = this.friends.findIndex(friend => 
+        friend.email === identifier || friend.phone === identifier
+    );
+    
+    if(index > -1){
+        const removed = this.friends[index];
+        this.friends.splice(index, 1);
+        console.log('Friend removed from repository:', removed);
+        return removed;
+    }
+    
+    return null;
+}
 }

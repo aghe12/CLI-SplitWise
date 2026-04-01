@@ -39,7 +39,7 @@ export const openInteractionManager = () => {
     choices.forEach((choice) => {
       console.log(`${choice.value}. ${choice.label}`);
     });
-    const choice = await ask("Please your choice", {
+    const choice = await ask("Please your choice:", {
       validator: (input) =>{
         if(optional && input.trim()=== ''){
           return true;
@@ -59,31 +59,3 @@ export const openInteractionManager = () => {
   }
 };
 
-// const run = async () => {
-//   console.log(
-//     "---------------WELCOME TO SPLIT EXPENSE DASHBOARD------------------",
-//   );
-//   while (true) {
-//     const prompt =
-//       "\n Options:\n\t1. Add New friend\n\t2. Show my friends\n\t3. Exit\nYour choice: ";
-//     const choice = await ask(prompt, {
-//       defaultAnswer: undefined,
-//       validator: undefined,
-//     });
-
-//     switch (choice) {
-//       case "1":
-//         // await AddFriend();
-//         break;
-//       case "2":
-//         // showFriends();
-//         break;
-//       case "3":
-//         console.log("Thank you, Goodbye!");
-//         rl.close();
-//         return;
-//     }
-//   }
-// };
-
-// run();

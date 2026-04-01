@@ -46,6 +46,20 @@ const searchFriend = async ()=>{
     }
 }
 
+const removeFriend = async ()=>{
+    const identifier = await ask('Enter friend email or phone number to remove:');
+    
+    const controller = new FriendsController();
+    const result = controller.removeFriend(identifier || '');
+    
+    if(result.success){
+        console.log(`${result.message}`);
+        console.log(`Removed: ${result.data?.name} (${result.data?.email}, ${result.data?.phone})`);
+    } else {
+        console.log(`${result.message}`);
+    }
+}
+
 export const manageFriends = async ()=>{
     while(true){
         const choice = await choose('What do you want to do?',options,false);
@@ -60,6 +74,9 @@ export const manageFriends = async ()=>{
                 break;
             case '3':
                 console.log('Updating friend...');
+                break;
+            case '4':
+                await removeFriend();
                 break;
             case '5':
                 console.log('Exiting...');
