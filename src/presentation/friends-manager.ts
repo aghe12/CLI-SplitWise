@@ -59,7 +59,68 @@ const removeFriend = async ()=>{
         console.log(`${result.message}`);
     }
 }
-
+    const updateFriend = async ()=>{
+    const identifier = await ask('Enter friend email or phone number to update:');
+    
+    const controller = new FriendsController();
+    const findResult = controller.searchFriends(identifier || '');
+    
+    if(!findResult.success || findResult.data.length === 0){
+        console.log('Friend not found with this email or phone');
+        return;
+    }
+    
+    const friend = findResult.data[0]!;
+    console.log(`\nCurrent friend info:`);
+    console.log(`- Name: ${friend.name}`);
+    console.log(`- Email: ${friend.email}`);
+    console.log(`- Phone: ${friend.phone}`);
+    console.log(`- Balance: $${friend.balance}`);
+    
+    console.log('\nWhat do you want to update?');
+    console.log('1. Name');
+    console.log('2. Email');
+    console.log('3. Phone');
+    console.log('4. Balance');
+    console.log('5. Cancel');
+    
+    const fieldChoice = await ask('Enter your choice (1-5):');
+    
+    if(fieldChoice === '5') {
+        console.log('Update cancelled');
+        return;
+    }
+    
+    let updates:any = {};
+    
+    switch(fieldChoice){
+        case '1':
+            updates.name = await ask('Enter new name:');
+            break;
+        case '2':
+            updates.email = await ask('Enter new email:');
+            break;
+        case '3':
+            updates.phone = await ask('Enter new phone number:');
+            break;
+        case '4':
+            const balanceInput = await ask('Enter new balance:', {validator:numberValidator});
+            updates.balance = Number(balanceInput);
+            break;
+        default:
+            console.log('Invalid choice');
+            return;
+    }
+    
+    const updateResult = controller.updateFriend(identifier || '', updates);
+    
+    if(updateResult.success){
+        console.log('Friend updated successfully!');
+        console.log(`Updated: ${updateResult.data?.name} (${updateResult.data?.email}, ${updateResult.data?.phone}) - Balance: $${updateResult.data?.balance}`);
+    } else {
+        console.log(`${updateResult.message}`);
+    }
+}
 export const manageFriends = async ()=>{
     while(true){
         const choice = await choose('What do you want to do?',options,false);
@@ -73,7 +134,7 @@ export const manageFriends = async ()=>{
                 await searchFriend();
                 break;
             case '3':
-                console.log('Updating friend...');
+                await updateFriend();
                 break;
             case '4':
                 await removeFriend();

@@ -30,6 +30,17 @@ export class FriendsController{
         total:result.matched
     };
 }
+    updateFriend(identifier:string, updates:{name?:string, email?:string, phone?:string, balance?:number}){
+    const repository = FriendRepository.getInstance();
+    if(!repository){
+        return {success:false, message:'Repository not available'}
+    }
+    const updatedFriend = repository.updateFriend(identifier, updates);
+    if(!updatedFriend){
+        return {success:false, message:'Friend not found with this email or phone'}
+    }
+    return {success:true, message:'Friend updated successfully', data:updatedFriend}
+}
     removeFriend(identifier:string){
     const repository = FriendRepository.getInstance();
     

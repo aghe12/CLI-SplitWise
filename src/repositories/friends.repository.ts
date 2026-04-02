@@ -53,4 +53,25 @@ export class FriendRepository{
     
     return null;
 }
+
+updateFriend(identifier:string, updates:{name?:string, email?:string, phone?:string, balance?:number}){
+    const index = this.friends.findIndex(friend => 
+        friend.email === identifier || friend.phone === identifier
+    );
+    
+    if(index === -1){
+        return null;
+    }
+    const friendToUpdate = this.friends[index];
+    if(!friendToUpdate){
+        return null;
+    }
+    if(updates.name !== undefined) friendToUpdate.name = updates.name;
+    if(updates.email !== undefined) friendToUpdate.email = updates.email;
+    if(updates.phone !== undefined) friendToUpdate.phone = updates.phone;
+    if(updates.balance !== undefined) friendToUpdate.balance = updates.balance;
+    
+    console.log('Friend updated in repository:', friendToUpdate);
+    return friendToUpdate;
+}
 }
