@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 export type ColumnData = string | number | boolean | null;
-export type Row = Record<string, ColumnData>; 
+export type Row = Record<string, ColumnData>;
 
 type Table = Row[];
 
@@ -29,6 +29,7 @@ export class JsonStorageAdapter<T> implements DatabaseStorageAdapter<T> {
 
 export class Database<T extends { [K in keyof T]: Table }> {
   private readonly dataStore: T = {} as T;
+
   constructor(
     private readonly filePath: string,
     private readonly adapter: DatabaseStorageAdapter<T>,
@@ -38,13 +39,16 @@ export class Database<T extends { [K in keyof T]: Table }> {
     }
 
     const dir = path.dirname(filePath);
+    console.log("Creating directory if it doesn't exist:", dir);
     fs.mkdirSync(dir, { recursive: true });
 
     let stats: fs.Stats;
     try {
+      console.log("Checking if file exists...");
       stats = fs.statSync(filePath);
     } catch (err: any) {
       if (err.code === "ENOENT") {
+        console.log("File does not exist. Creating new file...");
         fs.writeFileSync(filePath, this.adapter.serialize(this.dataStore));
         return;
       } else if (err.code === "EACCES") {
@@ -63,6 +67,7 @@ export class Database<T extends { [K in keyof T]: Table }> {
         `Cannot read & write on path "${filePath}". Check permissions!`,
       );
     }
+
     if (stats.size > 0) {
       let data: string;
       try {
@@ -84,7 +89,6 @@ export class Database<T extends { [K in keyof T]: Table }> {
   async save() {
     try {
       console.log("Saving in DB...");
-
       await fs.promises.writeFile(
         this.filePath,
         this.adapter.serialize(this.dataStore as unknown as T),
