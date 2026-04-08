@@ -1,9 +1,10 @@
 import type { PageOptions } from "../core/page-option.js";
 import type { iFriend } from "../models/friend.model.js";
+import { AppDBManager } from "../models/db-manager.js";
 
 export class FriendRepository {
   private static instance: FriendRepository;
-  private friends: iFriend[] = [];
+  private dbManager: AppDBManager;
 
   static getInstance() {
     if (!FriendRepository.instance) {
@@ -12,7 +13,9 @@ export class FriendRepository {
     return FriendRepository.instance;
   }
 
-  private constructor() {}
+  private constructor() {
+    this.dbManager = AppDBManager.getInstance();
+  }
 
   addFriend(friend: iFriend) {
     if (this.findFriendByEmail(friend.email)) {
@@ -25,23 +28,28 @@ export class FriendRepository {
       return null;
     }
 
-    this.friends.push(friend);
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
+    friendsTable.push(friend);
+    this.dbManager.save();
     console.log("Friend added to repository:", friend);
     return friend;
   }
 
   findFriendByEmail(email: string) {
-    return this.friends.find((friend) => friend.email === email);
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
+    return friendsTable.find((friend: iFriend) => friend.email === email);
   }
 
   findFriendByPhone(phone: string) {
-    return this.friends.find((friend) => friend.phone === phone);
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
+    return friendsTable.find((friend: iFriend) => friend.phone === phone);
   }
 
   searchFriends(query: string, pageOption?: PageOptions) {
     const lowerQuery = query.toLowerCase();
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
 
-    const filtered = this.friends.filter((friend) => {
+    const filtered = friendsTable.filter((friend: iFriend) => {
       return (
         friend.name.toLowerCase().includes(lowerQuery) ||
         friend.email.toLowerCase().includes(lowerQuery) ||
@@ -55,18 +63,20 @@ export class FriendRepository {
         (pageOption?.offset || 0) + (pageOption?.limit || 5),
       ),
       matched: filtered.length,
-      total: this.friends.length,
+      total: friendsTable.length,
     };
   }
 
   removeFriend(identifier: string) {
-    const index = this.friends.findIndex(
-      (friend) => friend.email === identifier || friend.phone === identifier,
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
+    const index = friendsTable.findIndex(
+      (friend: iFriend) => friend.email === identifier || friend.phone === identifier,
     );
 
     if (index > -1) {
-      const removed = this.friends[index];
-      this.friends.splice(index, 1);
+      const removed = friendsTable[index];
+      friendsTable.splice(index, 1);
+      this.dbManager.save();
       console.log("Friend removed from repository:", removed);
       return removed;
     }
@@ -83,23 +93,24 @@ export class FriendRepository {
       balance?: number;
     },
   ) {
-    const index = this.friends.findIndex(
-      (friend) => friend.email === identifier || friend.phone === identifier,
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
+    const index = friendsTable.findIndex(
+      (friend: iFriend) => friend.email === identifier || friend.phone === identifier,
     );
 
     if (index === -1) {
       return null;
     }
 
-    const friendToUpdate = this.friends[index];
+    const friendToUpdate = friendsTable[index];
     if (!friendToUpdate) {
       return null;
     }
 
     if (
       updates.email &&
-      this.friends.some(
-        (f) => f.email === updates.email && f.id !== friendToUpdate.id,
+      friendsTable.some(
+        (f: iFriend) => f.email === updates.email && f.id !== friendToUpdate.id,
       )
     ) {
       console.log("Duplicate email detected during update");
@@ -108,8 +119,8 @@ export class FriendRepository {
 
     if (
       updates.phone &&
-      this.friends.some(
-        (f) => f.phone === updates.phone && f.id !== friendToUpdate.id,
+      friendsTable.some(
+        (f: iFriend) => f.phone === updates.phone && f.id !== friendToUpdate.id,
       )
     ) {
       console.log("Duplicate phone detected during update");
@@ -121,10 +132,12 @@ export class FriendRepository {
     if (updates.phone !== undefined) friendToUpdate.phone = updates.phone;
     if (updates.balance !== undefined) friendToUpdate.balance = String(updates.balance);
 
+    this.dbManager.save();
     console.log("Friend updated in repository:", friendToUpdate);
     return friendToUpdate;
   }
   getAllFriends() {
-    return [...this.friends];
+    const friendsTable = this.dbManager.getDB().table('friends') as iFriend[];
+    return [...friendsTable];
   }
 }

@@ -78,7 +78,7 @@ const removeFriend = async () => {
   const friend = searchResult.data[0]!;
 
   if (Number(friend.balance) !== 0) {
-    console.log(`!!This friend has a balance: $${friend.balance}!!`);
+    console.log(`!!Warning: ${friend.name} (${friend.email}) still has a balance of $${friend.balance}!!`);
 
     const confirm = await choose("Do you want to continue?", [
       { label: "YES", value: "1" },

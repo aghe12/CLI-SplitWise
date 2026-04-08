@@ -3,7 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 
 export interface AskOptions {
   defaultAnswer?: string | undefined;
-  validator?: ((s: string) => boolean) | undefined;
+  validator?: ((s: string) => string | true) | undefined;
 }
 
 export interface Choice {
@@ -25,9 +25,12 @@ export const openInteractionManager = () => {
       rl.question(
         question + `${defaultAnswer ? "(" + defaultAnswer + ")" : ""}`,
         (answer: string) => {
-          if (validator && !validator(answer)) {
-            console.log("Invalid");
-            resolve(ask(question, { defaultAnswer, validator }));
+          if (validator) {
+            const validationResult = validator(answer);
+            if (validationResult !== true) {
+              console.log(`Invalid: ${validationResult}`);
+              resolve(ask(question, { defaultAnswer, validator }));
+            }
           }
           resolve(answer || defaultAnswer);
         },
@@ -44,7 +47,7 @@ export const openInteractionManager = () => {
         if(optional && input.trim()=== ''){
           return true;
         }
-        return choices.some((choice) => choice.value === input)},
+        return choices.some((choice) => choice.value === input) ? true : "Please choose a valid option"},
     });
     return choices!.find(c=>c.value===choice)
   };

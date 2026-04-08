@@ -1,57 +1,51 @@
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from 'fs';
+import * as path from 'path';
 
 export type ColumnData = string | number | boolean | null;
-export type Row = Record<string, ColumnData>;
+export type Row = Record<string, ColumnData>; // name: "", email: "am@email.com", phone: 234
 
-type Table = Row[];
+export type Table=Row[];
 
-export interface DatabaseStorageAdapter<T> {
-  parse: (content: string) => T;
-  serialize: (dataset: T) => string;
+export interface DatabaseStorageAdaptor<T>{
+  parse:(content:string)=>T;
+  serialize: (dataset:T) => string;
 }
 
-export class JsonStorageAdapter<T> implements DatabaseStorageAdapter<T> {
-  parse(content: string) {
+export class JsonAdapter<T> implements DatabaseStorageAdaptor<T> {
+  parse(content: string): T {
     try {
-      return JSON.parse(content) as T;
-    } catch (e) {
+      return JSON.parse(content);
+    } catch(e) {
       console.error(
         "Given filePath is not empty and its content is not valid JSON.",
       );
       throw e;
     }
   }
-  serialize(dataset: T) {
-    return JSON.stringify(dataset, null, 2);
+
+  serialize(dataset: T): string {
+    return JSON.stringify(dataset)
   }
 }
-
-export class Database<T extends { [K in keyof T]: Table }> {
+export class Database<T extends{[K in keyof T]:Table} > {
   private readonly dataStore: T = {} as T;
-
   constructor(
     private readonly filePath: string,
-    private readonly adapter: DatabaseStorageAdapter<T>,
+    private readonly adapter: DatabaseStorageAdaptor<T>
   ) {
     if (!filePath) {
-      throw new Error("Missing file path argument.");
+      throw new Error('Missing file path argument.');
     }
-
     const dir = path.dirname(filePath);
-    console.log("Creating directory if it doesn't exist:", dir);
     fs.mkdirSync(dir, { recursive: true });
 
     let stats: fs.Stats;
     try {
-      console.log("Checking if file exists...");
       stats = fs.statSync(filePath);
     } catch (err: any) {
-      if (err.code === "ENOENT") {
-        console.log("File does not exist. Creating new file...");
-        fs.writeFileSync(filePath, this.adapter.serialize(this.dataStore));
+      if (err.code === 'ENOENT') {
         return;
-      } else if (err.code === "EACCES") {
+      } else if (err.code === 'EACCES') {
         throw new Error(`Cannot access path "${filePath}".`);
       } else {
         throw new Error(
@@ -59,7 +53,6 @@ export class Database<T extends { [K in keyof T]: Table }> {
         );
       }
     }
-
     try {
       fs.accessSync(filePath, fs.constants.R_OK | fs.constants.W_OK);
     } catch (err: any) {
@@ -67,34 +60,31 @@ export class Database<T extends { [K in keyof T]: Table }> {
         `Cannot read & write on path "${filePath}". Check permissions!`,
       );
     }
-
     if (stats.size > 0) {
       let data: string;
       try {
-        data = fs.readFileSync(filePath, { encoding: "utf-8" });
+        data = fs.readFileSync(filePath, { encoding: 'utf-8' });
       } catch (err) {
         throw err;
       }
       this.dataStore = this.adapter.parse(data) as T;
     }
   }
-
-  table(tableName: keyof T): T[typeof tableName] {
+  table(tableName: keyof T): T[keyof T] {
     if (this.dataStore[tableName] === undefined) {
-      (this.dataStore as Record<keyof T, Row[]>)[tableName] = [];
+      (this.dataStore as any)[tableName] = [];
     }
     return this.dataStore[tableName];
   }
 
   async save() {
     try {
-      console.log("Saving in DB...");
       await fs.promises.writeFile(
         this.filePath,
-        this.adapter.serialize(this.dataStore as unknown as T),
+        this.adapter.serialize(this.dataStore),
       );
     } catch (e) {
-      console.error("Failed to save data to the given filePath.");
+      console.error('Failed to save data to the given filePath.');
       throw e;
     }
   }

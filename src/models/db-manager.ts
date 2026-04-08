@@ -1,18 +1,27 @@
-import { Database, JsonStorageAdapter } from "../core/storage/db.js";
-import type { iFriend } from "./friend.model.js";
 import path from "path";
+import {
+  Database,
+  JsonAdapter, 
+  type Table,
+} from "../core/storage/db.js";
+import type { iFriend } from "./friend.model.js";
 
-interface AppData {
+interface AppData extends Record<string, Table> {
   friends: iFriend[];
 }
 
 export class AppDBManager {
-  private constructor() {
-    const dbPath = path.join(process.cwd(), "data", "data.json");
-    this.db = new Database<AppData>(dbPath, new JsonStorageAdapter());
-  }
-  private static sharedInstance: AppDBManager | undefined = undefined;
   private db: Database<AppData>;
+  private static sharedInstance: AppDBManager | undefined = undefined;
+
+  private constructor() {
+    const dbPath = path.resolve(process.cwd(),'data/data.json');// "data", "data.json");
+//../../data/data.json if needed to be add in dist
+
+    const adapter = new JsonAdapter<AppData>();
+
+    this.db = new Database<AppData>(dbPath, adapter);
+  }
 
   static getInstance(): AppDBManager {
     if (!this.sharedInstance) {
@@ -26,10 +35,6 @@ export class AppDBManager {
   }
 
   save() {
-    try {
-      this.db.save();
-    } catch (e) {
-      console.log(e);
-    }
+    this.db.save();
   }
 }
