@@ -13,9 +13,10 @@
   "type": "module",
   "license": "ISC",
   "dependencies": {
+    "mysql2": "^3.21.1",
     "typescript": "^6.0.2"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0"
+    "@types/node": "^25.5.2"
   }
 }
